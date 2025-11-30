@@ -4,11 +4,15 @@ emoji: ⚛️
 colorFrom: indigo
 colorTo: purple
 sdk: gradio
-sdk_version: 6.0.0
+sdk_version: 6.0.1
 app_file: app.py
 pinned: false
 license: mit
 short_description: Quantum Circuit Architect & MCP Server for AI Agents
+tags:
+  - building-mcp-track-enterprise
+  - building-mcp-track-consumer
+  - building-mcp-track-creative 
 ---
 
 # QuantumArchitect-MCP 🔬⚛️

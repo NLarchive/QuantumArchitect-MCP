@@ -1,8 +1,8 @@
 # Core dependencies
- 
-gradio[mcp]>=6.0.0
+gradio[mcp]~=6.0.0
+huggingface_hub>=0.33.5,<2.0
 
-# Quantum computing
+# Quantum computing 
 qiskit>=1.0.0
 qiskit-aer>=0.14.0
 

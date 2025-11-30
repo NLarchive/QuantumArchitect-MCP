@@ -121,44 +121,45 @@ def add_circuit_builder_tab():
                     clear_circuit_btn = gr.Button("🗑️ Clear", variant="secondary")
                     undo_btn = gr.Button("↩️ Undo", variant="secondary")
 
-                builder_gates_json = gr.Code(
-                    value="[]",
-                    language="json",
-                    label="Gates JSON",
-                    lines=1,
-                    visible=True,
-                    elem_classes=["compact-code"]
-                )
-
         # Results section - compact 3-column grid layout
         gr.Markdown("### 📊 Simulation Results")
 
         with gr.Row(equal_height=True):
-            # Column 1: Probabilities + Q-Sphere
+            # Column 1: Gates JSON (open) + Probabilities (closed)
             with gr.Column(scale=1, min_width=300):
+                with gr.Accordion("📋 Gates JSON", open=True):
+                    builder_gates_json = gr.Code(
+                        value="[]",
+                        language="json",
+                        label="Gates JSON",
+                        lines=1,
+                        visible=True,
+                        elem_classes=["compact-code"]
+                    )
+                
                 with gr.Accordion("📊 Probabilities", open=True):
                     simulation_results = gr.HTML(
                         value="<div class='results-placeholder'>Run simulation to see probability distribution</div>",
                         elem_id="simulation-results",
                         elem_classes=["result-compact"]
                     )
-                
+
+            # Column 2: Q-Sphere (open) + Bloch Sphere (opens on data)
+            with gr.Column(scale=1, min_width=300):
                 with gr.Accordion("🌐 Q-Sphere", open=True):
                     qsphere_display = gr.HTML(
                         value="<div class='results-placeholder'>Q-Sphere visualization</div>",
                         elem_id="qsphere-display",
                         elem_classes=["result-compact"]
                     )
-
-            # Column 2: Bloch Sphere (single qubit)
-            with gr.Column(scale=1, min_width=300):
+                
                 with gr.Accordion("🔮 Bloch Sphere (1q)", open=True):
                     bloch_display = gr.Plot(
                         elem_id="bloch-display",
                         elem_classes=["result-compact"]
                     )
 
-            # Column 3: Statevector + Raw JSON
+            # Column 3: Statevector + Raw Data
             with gr.Column(scale=1, min_width=300):
                 with gr.Accordion("📐 Statevector", open=True):
                     statevector_display = gr.HTML(
@@ -167,7 +168,7 @@ def add_circuit_builder_tab():
                         elem_classes=["result-compact"]
                     )
                 
-                with gr.Accordion("📈 Raw Data", open=False):
+                with gr.Accordion("📈 Raw Data", open=True):
                     raw_results = gr.JSON(
                         elem_id="raw-results",
                         elem_classes=["result-compact"]
