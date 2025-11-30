@@ -1,4 +1,6 @@
 # HF Space Configuration
-# Used by GitHub Actions workflow
-HF_USERNAME=NLarchive
+# Used by GitHub Actions workflow to deploy to multiple spaces
+# Deployed to: https://huggingface.co/spaces/MCPNLarchive/QuantumArchitect-MCP
+#              https://huggingface.co/spaces/MCPMCP-1st-Birthday/QuantumArchitect-MCP
+HF_USERNAME=MCPNLarchive
 HF_SPACE_NAME=QuantumArchitect-MCP
