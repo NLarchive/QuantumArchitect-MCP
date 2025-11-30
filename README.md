@@ -13,6 +13,7 @@ tags:
   - building-mcp-track-enterprise
   - building-mcp-track-consumer
   - building-mcp-track-creative 
+  - Google-Gemini-API
 ---
 VIDEO: https://youtu.be/E1Ailx1X1YE
 SOCIAL: https://www.linkedin.com/posts/nicolas-larenas_quantumarchitect-mcp-a-hugging-face-space-activity-7401024993893044225-RF-R?utm_source=share&utm_medium=member_desktop&rcm=ACoAADmu0wIBjvA0DVdHvqncNUVTEW72gbiGUps

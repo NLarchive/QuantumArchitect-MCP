@@ -127,7 +127,12 @@ def ui_score_circuit(qasm: str, hardware: str) -> str:
         
         fidelity = result.get("estimated_fidelity")
         if fidelity:
-            lines.append(f"\n**Estimated Fidelity:** {fidelity:.4f}")
+            # fidelity can be a dict with 'fidelity' key or a float
+            if isinstance(fidelity, dict):
+                fidelity_val = fidelity.get("fidelity", 0.0)
+            else:
+                fidelity_val = fidelity
+            lines.append(f"\n**Estimated Fidelity:** {fidelity_val:.4f}")
         
         return "\n".join(lines)
     else:
