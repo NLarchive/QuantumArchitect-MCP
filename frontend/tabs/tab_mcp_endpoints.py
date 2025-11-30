@@ -1,15 +1,171 @@
 """
-MCP Endpoints Tab for QuantumArchitect-MCP
+Path: QuantumArchitect-MCP/frontend/tabs/tab_mcp_endpoints.py
+Related: ui/mcp_tools.py, src/mcp_server/endpoint_handlers.py
+Purpose: MCP Endpoints documentation tab with health status monitoring
 """
 
 import gradio as gr
+import time
+
+
+def check_mcp_health() -> str:
+    """Check health status of MCP endpoints and return HTML status report."""
+    start_time = time.time()
+    
+    # Define endpoint categories and their tools
+    endpoint_categories = {
+        "Circuit Creation": ["create_circuit", "parse_qasm", "build_circuit"],
+        "Validation": ["validate_circuit", "check_hardware"],
+        "Simulation": ["simulate", "get_statevector", "estimate_fidelity"],
+        "Scoring": ["score_circuit", "compare_circuits"],
+        "Documentation": ["get_gate_info", "get_algorithm_info", "list_hardware", "list_templates", "get_learning_path"]
+    }
+    
+    # Check if core imports work
+    status_checks = {}
+    
+    try:
+        from src.mcp_server import context_provider
+        status_checks["Context Provider"] = ("✅", "Loaded")
+    except Exception as e:
+        status_checks["Context Provider"] = ("❌", str(e)[:50])
+    
+    try:
+        from src.mcp_server import endpoint_handlers
+        status_checks["Endpoint Handlers"] = ("✅", "Loaded")
+    except Exception as e:
+        status_checks["Endpoint Handlers"] = ("❌", str(e)[:50])
+    
+    try:
+        from src.core import circuit_parser
+        status_checks["Circuit Parser"] = ("✅", "Loaded")
+    except Exception as e:
+        status_checks["Circuit Parser"] = ("❌", str(e)[:50])
+    
+    try:
+        import qiskit
+        status_checks["Qiskit Backend"] = ("✅", f"v{qiskit.__version__}")
+    except Exception as e:
+        status_checks["Qiskit Backend"] = ("⚠️", "Not installed")
+    
+    try:
+        import numpy
+        status_checks["NumPy"] = ("✅", f"v{numpy.__version__}")
+    except Exception as e:
+        status_checks["NumPy"] = ("❌", str(e)[:50])
+    
+    # Calculate overall health
+    healthy_count = sum(1 for s, _ in status_checks.values() if s == "✅")
+    total_count = len(status_checks)
+    health_percent = (healthy_count / total_count) * 100
+    
+    elapsed = (time.time() - start_time) * 1000
+    
+    # Build HTML report
+    html = f"""
+    <div style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); padding: 20px; border-radius: 12px; border: 1px solid #30363d;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h3 style="color: #4fc3f7; margin: 0;">🔧 MCP Server Health Status</h3>
+            <div style="display: flex; gap: 15px; align-items: center;">
+                <span style="color: #8b949e; font-size: 0.9em;">Response: {elapsed:.1f}ms</span>
+                <span style="
+                    background: {'#3fb950' if health_percent >= 80 else '#d29922' if health_percent >= 50 else '#f85149'};
+                    color: #0d1117;
+                    padding: 4px 12px;
+                    border-radius: 20px;
+                    font-weight: bold;
+                    font-size: 0.9em;
+                ">{health_percent:.0f}% Healthy</span>
+            </div>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 20px;">
+    """
+    
+    for name, (status, detail) in status_checks.items():
+        color = "#3fb950" if status == "✅" else "#d29922" if status == "⚠️" else "#f85149"
+        html += f"""
+            <div style="background: #21262d; padding: 12px; border-radius: 8px; border-left: 3px solid {color};">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="color: #c9d1d9; font-weight: 500;">{name}</span>
+                    <span>{status}</span>
+                </div>
+                <div style="color: #8b949e; font-size: 0.8em; margin-top: 4px;">{detail}</div>
+            </div>
+        """
+    
+    html += """
+        </div>
+        
+        <div style="margin-top: 15px;">
+            <h4 style="color: #7c4dff; margin-bottom: 10px;">📡 Endpoint Categories</h4>
+            <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+    """
+    
+    category_colors = {
+        "Circuit Creation": "#4fc3f7",
+        "Validation": "#3fb950",
+        "Simulation": "#d29922",
+        "Scoring": "#f06292",
+        "Documentation": "#7c4dff"
+    }
+    
+    for category, tools in endpoint_categories.items():
+        color = category_colors.get(category, "#8b949e")
+        html += f"""
+            <div style="
+                background: {color}20;
+                border: 1px solid {color}60;
+                padding: 8px 14px;
+                border-radius: 20px;
+                display: flex;
+                align-items: center;
+                gap: 6px;
+            ">
+                <span style="color: {color}; font-weight: 500;">{category}</span>
+                <span style="
+                    background: {color};
+                    color: #0d1117;
+                    padding: 2px 8px;
+                    border-radius: 10px;
+                    font-size: 0.75em;
+                    font-weight: bold;
+                ">{len(tools)}</span>
+            </div>
+        """
+    
+    html += """
+            </div>
+        </div>
+        
+        <div style="margin-top: 15px; padding: 10px; background: #21262d; border-radius: 8px;">
+            <p style="color: #8b949e; margin: 0; font-size: 0.9em;">
+                💡 <strong style="color: #c9d1d9;">Gradio 6 MCP Server:</strong> 
+                When <code style="background: #30363d; padding: 2px 6px; border-radius: 4px;">mcp_server=True</code> is set in 
+                <code style="background: #30363d; padding: 2px 6px; border-radius: 4px;">demo.launch()</code>, 
+                Gradio automatically exposes all functions with <code style="background: #30363d; padding: 2px 6px; border-radius: 4px;">@gr.tool</code> 
+                decorator as MCP endpoints.
+            </p>
+        </div>
+    </div>
+    """
+    
+    return html
 
 
 def add_mcp_endpoints_tab():
     """Add the MCP Endpoints tab to the Gradio interface."""
-    with gr.TabItem("🔗 MCP Endpoints", id="mcp-endpoints"):
+    with gr.TabItem(" MCP Endpoints", id="mcp-endpoints"):
+
+        # MCP Health Status Section
+        with gr.Accordion(" MCP Server Health Status", open=True):
+            gr.Markdown("Check the health and availability of MCP endpoints and core dependencies.")
+            health_btn = gr.Button(" Check Health Status", variant="primary")
+            health_output = gr.HTML(value="<p style='color: #8b949e;'>Click 'Check Health Status' to view server health.</p>")
+            health_btn.click(fn=check_mcp_health, inputs=[], outputs=[health_output])
+
         gr.Markdown("""
-        # 🔗 Model Context Protocol (MCP) Endpoints
+        #  Model Context Protocol (MCP) Endpoints
 
         This application exposes **26 quantum circuit tools** via the MCP protocol for AI agents and automation.
         All endpoints accept JSON parameters and return JSON results.

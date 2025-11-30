@@ -1,10 +1,9 @@
 """
-VQE (Variational Quantum Eigensolver) Study Tab for QuantumArchitect-MCP
-
-This module provides an interactive educational tab explaining VQE,
-a cornerstone NISQ algorithm for quantum chemistry and optimization.
-
-Professional-level content with beginner-friendly explanations.
+Path: QuantumArchitect-MCP/frontend/tabs/tab_vqe_study.py
+Related: app.py, frontend/tabs/__init__.py
+Purpose: VQE (Variational Quantum Eigensolver) Study Tab - educational module explaining VQE,
+         a cornerstone NISQ algorithm for quantum chemistry and optimization.
+         Provides interactive demos, QASM generation, and professional-level content.
 """
 
 import gradio as gr
@@ -260,9 +259,84 @@ def explain_measurement_strategies() -> str:
     return html
 
 
+def generate_vqe_qasm(num_qubits: int, num_layers: int, entanglement: str) -> tuple:
+    """Generate OpenQASM 2.0 code for a VQE hardware-efficient ansatz."""
+    import random
+    random.seed(42)  # For reproducible example
+    
+    lines = [
+        "OPENQASM 2.0;",
+        'include "qelib1.inc";',
+        f"qreg q[{num_qubits}];",
+        f"creg c[{num_qubits}];",
+        "",
+        "// VQE Hardware-Efficient Ansatz",
+        f"// Layers: {num_layers}, Entanglement: {entanglement}",
+        ""
+    ]
+    
+    param_idx = 0
+    for layer in range(num_layers):
+        lines.append(f"// Layer {layer + 1} - Rotation sublayer")
+        for q in range(num_qubits):
+            theta = random.uniform(0, 3.14159)
+            lines.append(f"ry({theta:.4f}) q[{q}];  // theta_{param_idx}")
+            param_idx += 1
+        
+        lines.append(f"// Layer {layer + 1} - Entanglement sublayer ({entanglement})")
+        if entanglement == "linear":
+            for q in range(num_qubits - 1):
+                lines.append(f"cx q[{q}],q[{q+1}];")
+        elif entanglement == "full":
+            for q1 in range(num_qubits):
+                for q2 in range(q1 + 1, num_qubits):
+                    lines.append(f"cx q[{q1}],q[{q2}];")
+        elif entanglement == "circular":
+            for q in range(num_qubits - 1):
+                lines.append(f"cx q[{q}],q[{q+1}];")
+            if num_qubits > 2:
+                lines.append(f"cx q[{num_qubits-1}],q[0];")
+        lines.append("")
+    
+    # Final rotation layer
+    lines.append("// Final rotation layer")
+    for q in range(num_qubits):
+        theta = random.uniform(0, 3.14159)
+        lines.append(f"rz({theta:.4f}) q[{q}];  // theta_{param_idx}")
+        param_idx += 1
+    
+    lines.append("\n// Measurement")
+    for i in range(num_qubits):
+        lines.append(f"measure q[{i}] -> c[{i}];")
+    
+    qasm = "\n".join(lines)
+    
+    # Generate ASCII diagram
+    diagram_lines = []
+    for q in range(num_qubits):
+        line = f"q{q}: ─"
+        for layer in range(num_layers):
+            line += f"[Ry(θ)]─"
+            if entanglement == "linear" and q < num_qubits - 1:
+                line += "●─"
+            elif entanglement == "linear" and q > 0:
+                line += "X─"
+            elif entanglement == "full":
+                line += "●─" if q == 0 else "┼─"
+            else:
+                line += "─"
+        line += "[Rz(θ)]─[M]"
+        diagram_lines.append(line)
+    
+    diagram = "\n".join(diagram_lines)
+    diagram += f"\n\nTotal parameters: {param_idx}"
+    
+    return qasm, diagram
+
+
 def add_vqe_study_tab():
     """Add the VQE study tab to the Gradio interface."""
-    
+
     with gr.Tab("⚛️ VQE"):
         gr.Markdown("""
         <div style="text-align: center; padding: 15px 0;">
@@ -345,7 +419,30 @@ def add_vqe_study_tab():
                 inputs=[iterations_slider],
                 outputs=[plot_output, analysis_output]
             )
-        
+
+        # QASM and Diagram Output
+        with gr.Accordion("📝 Circuit Output (QASM & Diagram)", open=True):
+            gr.Markdown("Generate OpenQASM 2.0 code for a VQE hardware-efficient ansatz.")
+            
+            with gr.Row():
+                vqe_qubits = gr.Slider(minimum=2, maximum=6, value=4, step=1, label="Qubits")
+                vqe_layers = gr.Slider(minimum=1, maximum=4, value=2, step=1, label="Ansatz Layers")
+                vqe_entanglement = gr.Dropdown(choices=["linear", "full", "circular"], value="linear", label="Entanglement")
+            
+            generate_vqe_btn = gr.Button("📝 Generate VQE Ansatz QASM", variant="secondary")
+            
+            with gr.Row():
+                with gr.Column():
+                    vqe_qasm_output = gr.Code(language="python", label="OpenQASM 2.0", lines=15)
+                with gr.Column():
+                    vqe_diagram_output = gr.Textbox(label="Ansatz Diagram", lines=8)
+            
+            generate_vqe_btn.click(
+                fn=generate_vqe_qasm,
+                inputs=[vqe_qubits, vqe_layers, vqe_entanglement],
+                outputs=[vqe_qasm_output, vqe_diagram_output]
+            )
+
         # Ansatz Section
         with gr.Accordion("🔧 Ansatz Design", open=False):
             gr.Markdown("""

@@ -279,16 +279,14 @@ def validate_circuit(
         
         # Check connectivity
         if check_connectivity and hardware_target:
-            hardware_profile = get_hardware_profile(hardware_target)
-            if hardware_profile:
-                connectivity_result = validate_connectivity(dag, hardware_profile)
-                results["checks"]["connectivity"] = connectivity_result
-                
-                if not connectivity_result["valid"]:
-                    results["valid"] = False
-                    results["errors"].extend(connectivity_result.get("violations", []))
-            else:
-                results["warnings"].append(f"Hardware profile '{hardware_target}' not found")
+            # validate_connectivity expects (circuit_data: dict, hardware_name: str)
+            circuit_data = dag.to_dict()
+            connectivity_result = validate_connectivity(circuit_data, hardware_target)
+            results["checks"]["connectivity"] = connectivity_result
+            
+            if not connectivity_result["valid"]:
+                results["valid"] = False
+                results["errors"].extend(connectivity_result.get("violations", []))
         
         # Check unitarity
         if check_unitary:

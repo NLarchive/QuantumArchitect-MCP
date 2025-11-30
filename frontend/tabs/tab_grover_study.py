@@ -179,11 +179,97 @@ def run_grover_demo(n_qubits: int, marked_state_str: str, num_iterations: int) -
         </div>
     </div>
     """
-    
+
     return initial_html, final_html, analysis_html
 
 
-def visualize_amplitude_evolution(n_qubits: int, marked_state_str: str, max_iterations: int) -> str:
+def generate_grover_qasm(n_qubits: int, marked_state_str: str, num_iterations: int) -> tuple:
+    """Generate OpenQASM 2.0 code for Grover's algorithm."""
+    try:
+        marked_state = int(marked_state_str, 2) if marked_state_str else 0
+    except:
+        marked_state = 0
+    
+    N = 2**n_qubits
+    marked_state = marked_state % N
+    
+    lines = [
+        "OPENQASM 2.0;",
+        'include "qelib1.inc";',
+        f"qreg q[{n_qubits}];",
+        f"creg c[{n_qubits}];",
+        "",
+        "// Initialize uniform superposition"
+    ]
+    
+    for i in range(n_qubits):
+        lines.append(f"h q[{i}];")
+    
+    for iteration in range(num_iterations):
+        lines.append(f"\n// --- Grover Iteration {iteration + 1} ---")
+        lines.append(f"// Oracle: mark state |{format(marked_state, f'0{n_qubits}b')}⟩")
+        
+        # Oracle: flip bits where marked_state has 0, apply multi-controlled Z, flip back
+        for i in range(n_qubits):
+            if not (marked_state >> i) & 1:
+                lines.append(f"x q[{i}];")
+        
+        # Multi-controlled Z (simplified for 2-3 qubits)
+        if n_qubits == 2:
+            lines.append("cz q[0],q[1];")
+        elif n_qubits >= 3:
+            lines.append(f"h q[{n_qubits-1}];")
+            if n_qubits == 3:
+                lines.append("ccx q[0],q[1],q[2];")
+            else:
+                lines.append(f"// MCZ on {n_qubits} qubits (simplified)")
+            lines.append(f"h q[{n_qubits-1}];")
+        
+        for i in range(n_qubits):
+            if not (marked_state >> i) & 1:
+                lines.append(f"x q[{i}];")
+        
+        lines.append("\n// Diffusion operator")
+        for i in range(n_qubits):
+            lines.append(f"h q[{i}];")
+        for i in range(n_qubits):
+            lines.append(f"x q[{i}];")
+        
+        if n_qubits == 2:
+            lines.append("cz q[0],q[1];")
+        elif n_qubits >= 3:
+            lines.append(f"h q[{n_qubits-1}];")
+            if n_qubits == 3:
+                lines.append("ccx q[0],q[1],q[2];")
+            else:
+                lines.append(f"// MCZ on {n_qubits} qubits")
+            lines.append(f"h q[{n_qubits-1}];")
+        
+        for i in range(n_qubits):
+            lines.append(f"x q[{i}];")
+        for i in range(n_qubits):
+            lines.append(f"h q[{i}];")
+    
+    lines.append("\n// Measurement")
+    for i in range(n_qubits):
+        lines.append(f"measure q[{i}] -> c[{i}];")
+    
+    qasm = "\n".join(lines)
+    
+    # Generate ASCII diagram
+    diagram_lines = []
+    for i in range(n_qubits):
+        line = f"q{i}: ─[H]─"
+        for _ in range(num_iterations):
+            line += "┤Oracle├─┤Diffusion├─"
+        line += "─[M]─"
+        diagram_lines.append(line)
+    diagram = "\n".join(diagram_lines)
+    
+    return qasm, diagram
+
+
+def visualize_amplitude_evolution(n_qubits: int,marked_state_str: str, max_iterations: int) -> str:
     """Create visualization showing amplitude evolution over iterations."""
     try:
         marked_state = int(marked_state_str, 2) if marked_state_str else 0
@@ -478,7 +564,30 @@ def add_grover_study_tab():
                 inputs=[n_qubits_slider, marked_input, iterations_slider],
                 outputs=[initial_output, final_output, analysis_output]
             )
-        
+
+        # QASM and Diagram Output
+        with gr.Accordion("📝 Circuit Output (QASM & Diagram)", open=True):
+            gr.Markdown("Generate OpenQASM 2.0 code and circuit diagram for the current Grover configuration.")
+            
+            with gr.Row():
+                qasm_qubits = gr.Slider(minimum=2, maximum=5, value=3, step=1, label="Qubits")
+                qasm_target = gr.Textbox(value="101", label="Target State (binary)")
+                qasm_iters = gr.Slider(minimum=1, maximum=5, value=2, step=1, label="Iterations")
+            
+            generate_qasm_btn = gr.Button("📝 Generate QASM", variant="secondary")
+            
+            with gr.Row():
+                with gr.Column():
+                    grover_qasm_output = gr.Code(language="python", label="OpenQASM 2.0", lines=15)
+                with gr.Column():
+                    grover_diagram_output = gr.Textbox(label="Circuit Diagram", lines=8)
+            
+            generate_qasm_btn.click(
+                fn=generate_grover_qasm,
+                inputs=[qasm_qubits, qasm_target, qasm_iters],
+                outputs=[grover_qasm_output, grover_diagram_output]
+            )
+
         # Amplitude Evolution
         with gr.Accordion("📈 Amplitude Evolution Visualization", open=True):
             gr.Markdown("""

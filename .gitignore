@@ -40,3 +40,4 @@ Thumbs.db
 tasks-project-state.json
 #
 tests/
+.docs/
