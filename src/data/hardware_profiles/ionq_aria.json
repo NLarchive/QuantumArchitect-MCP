@@ -1,0 +1,36 @@
+{
+    "name": "ionq_aria",
+    "display_name": "IonQ Aria",
+    "provider": "IonQ",
+    "technology": "trapped-ion",
+    "num_qubits": 25,
+    "connectivity": "all-to-all",
+    "coupling_map": "full",
+    "basis_gates": ["gpi", "gpi2", "ms", "zz"],
+    "native_gates": {
+        "single_qubit": ["gpi", "gpi2", "rz"],
+        "two_qubit": ["ms", "zz"]
+    },
+    "gate_times": {
+        "single_qubit_us": 10,
+        "two_qubit_us": 200,
+        "measurement_us": 300
+    },
+    "gate_errors": {
+        "single_qubit": 0.0003,
+        "two_qubit": 0.006,
+        "measurement": 0.003
+    },
+    "coherence_times": {
+        "t1_ms": 10000,
+        "t2_ms": 1000
+    },
+    "features": [
+        "All-to-all connectivity",
+        "High gate fidelity",
+        "Long coherence times",
+        "Mid-circuit measurement"
+    ],
+    "notes": "IonQ Aria trapped-ion quantum computer with all-to-all qubit connectivity. Ideal for algorithms requiring high connectivity without SWAP overhead.",
+    "last_updated": "2024-01-01"
+}

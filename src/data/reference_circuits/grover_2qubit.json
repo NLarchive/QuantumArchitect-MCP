@@ -1,0 +1,32 @@
+{
+    "name": "grover_2qubit",
+    "description": "Simple 2-qubit Grover search marking state |11⟩",
+    "algorithm_type": "search",
+    "num_qubits": 2,
+    "num_classical_bits": 2,
+    "gates": [
+        {"name": "h", "qubits": [0], "params": []},
+        {"name": "h", "qubits": [1], "params": []},
+        {"name": "cz", "qubits": [0, 1], "params": []},
+        {"name": "h", "qubits": [0], "params": []},
+        {"name": "h", "qubits": [1], "params": []},
+        {"name": "z", "qubits": [0], "params": []},
+        {"name": "z", "qubits": [1], "params": []},
+        {"name": "cz", "qubits": [0, 1], "params": []},
+        {"name": "h", "qubits": [0], "params": []},
+        {"name": "h", "qubits": [1], "params": []}
+    ],
+    "qasm": "OPENQASM 2.0;\ninclude \"qelib1.inc\";\nqreg q[2];\ncreg c[2];\nh q[0];\nh q[1];\ncz q[0], q[1];\nh q[0];\nh q[1];\nz q[0];\nz q[1];\ncz q[0], q[1];\nh q[0];\nh q[1];\nmeasure q -> c;",
+    "expected_output": {
+        "dominant_state": "11",
+        "probability": 1.0
+    },
+    "complexity": {
+        "depth": 7,
+        "gate_count": 10,
+        "two_qubit_gates": 2
+    },
+    "references": [
+        "Grover, L. K. (1996). A fast quantum mechanical algorithm for database search."
+    ]
+}

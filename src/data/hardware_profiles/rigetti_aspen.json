@@ -1,0 +1,24 @@
+{
+    "name": "rigetti_aspen",
+    "display_name": "Rigetti Aspen-M (80 qubits)",
+    "num_qubits": 80,
+    "native_gates": ["cz", "rx", "rz"],
+    "basis_gates": ["cz", "rx", "rz", "measure"],
+    "description": "80-qubit Rigetti Aspen processor with octagonal lattice",
+    "topology": "octagonal",
+    "t1_us": 30,
+    "t2_us": 25,
+    "single_qubit_gate_error": 0.002,
+    "two_qubit_gate_error": 0.02,
+    "readout_error": 0.03,
+    "gate_time_1q_ns": 40,
+    "gate_time_2q_ns": 200,
+    "coupling_map": [
+        [0, 1], [1, 0], [1, 2], [2, 1], [2, 3], [3, 2], [3, 4], [4, 3],
+        [4, 5], [5, 4], [5, 6], [6, 5], [6, 7], [7, 6], [7, 0], [0, 7],
+        [0, 8], [8, 0], [2, 9], [9, 2], [4, 10], [10, 4], [6, 11], [11, 6],
+        [8, 12], [12, 8], [9, 13], [13, 9], [10, 14], [14, 10], [11, 15], [15, 11]
+    ],
+    "provider": "Rigetti Computing",
+    "availability": "cloud"
+}

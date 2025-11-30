@@ -1,0 +1,18 @@
+{
+    "name": "bell_state",
+    "description": "Bell state circuit - maximally entangled 2-qubit state",
+    "algorithm_type": "entanglement",
+    "num_qubits": 2,
+    "num_classical_bits": 2,
+    "gates": [
+        {"name": "h", "qubits": [0]},
+        {"name": "cx", "qubits": [0, 1]},
+        {"name": "measure", "qubits": [0], "classical_bits": [0]},
+        {"name": "measure", "qubits": [1], "classical_bits": [1]}
+    ],
+    "expected_output": {
+        "00": 0.5,
+        "11": 0.5
+    },
+    "qasm": "OPENQASM 2.0;\ninclude \"qelib1.inc\";\nqreg q[2];\ncreg c[2];\nh q[0];\ncx q[0],q[1];\nmeasure q[0] -> c[0];\nmeasure q[1] -> c[1];"
+}
