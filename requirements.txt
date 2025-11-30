@@ -1,6 +1,6 @@
 # Core dependencies
-gradio>=6.0.0
-gradio-mcp>=0.0.1
+ 
+gradio[mcp]>=6.0.0
 
 # Quantum computing
 qiskit>=1.0.0

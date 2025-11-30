@@ -152,14 +152,14 @@ with gr.Blocks(
         """)
 
 
-# Launch the Gradio app
-if __name__ == "__main__":
+# Launch the Gradio app     
+if __name__ == "__main__":  
     demo.launch(
-        server_name="127.0.0.1",
-        server_port=7861,
+        server_name="0.0.0.0",
         show_error=True,
         debug=True,
         share=False,
+        mcp_server=True,
         css=IBM_COMPOSER_CSS,
         theme=gr.themes.Base(
             primary_hue="blue",
